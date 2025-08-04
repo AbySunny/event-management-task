@@ -2,30 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import DeleteButton from "@/components/DeleteButton";
 import { notFound } from "next/navigation";
+import { getEvent } from "@/lib/events";
 
-async function getEvent(id) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/events/${id}`,
-    {
-      cache: "no-store",
-    }
-  );
-
-  if (res.status === 404) {
-    // This will be caught by the notFound() function and render the not-found.js file
-    return null;
-  }
-
-  if (!res.ok) {
-    // This will be caught by the error.js Error Boundary
-    throw new Error("Failed to fetch event");
-  }
-
-  return res.json();
-}
-
-export default async function EventDetailsPage({ params }) {
-  const result = await getEvent(params.id);
+export default async function EventDetailsPage({ params: { id } }) {
+  const result = await getEvent(id);
 
   if (!result || !result.data) {
     notFound();
@@ -83,7 +63,15 @@ export default async function EventDetailsPage({ params }) {
               <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                 {event.description}
               </p>
-              <DeleteButton eventId={event._id} />
+              <div className="mt-6 flex items-center gap-4">
+                <Link
+                  href={`/events/${event._id}/edit`}
+                  className="inline-block py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Edit Event
+                </Link>
+                <DeleteButton eventId={event._id} />
+              </div>
             </div>
           </div>
         </div>

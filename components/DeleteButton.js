@@ -33,7 +33,7 @@ export default function DeleteButton({ eventId }) {
     <button
       onClick={handleDelete}
       disabled={isDeleting}
-      className="mt-4 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-red-300"
+      className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-red-300"
     >
       {isDeleting ? 'Deleting...' : 'Delete Event'}
     </button>

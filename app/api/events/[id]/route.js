@@ -3,8 +3,7 @@ import Event from '@/models/Event';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 
-export async function GET(request, { params }) {
-  const { id } = params;
+export async function GET(request, { params: { id } }) {
 
   if (!mongoose.isValidObjectId(id)) {
     return NextResponse.json({ success: false, error: 'Invalid event ID format' }, { status: 400 });
@@ -22,17 +21,45 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({ success: true, data: event });
   } catch (error) {
-    // Handle potential CastError if the ID format is invalid
-    if (error.name === 'CastError') {
-        return NextResponse.json({ success: false, error: 'Invalid event ID format' }, { status: 400 });
-    }
     console.error(`Error fetching event ${id}:`, error);
     return NextResponse.json({ success: false, error: 'Server Error' }, { status: 500 });
   }
 }
 
-export async function DELETE(request, { params }) {
-  const { id } = params;
+export async function PUT(request, { params: { id } }) {
+
+  if (!mongoose.isValidObjectId(id)) {
+    return NextResponse.json({ success: false, error: 'Invalid event ID' }, { status: 400 });
+  }
+
+  try {
+    const data = await request.json();
+    await dbConnect();
+
+    const event = await Event.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!event) {
+      return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: event });
+  } catch (error) {
+    console.error(`Error updating event ${id}:`, error);
+    if (error.name === 'ValidationError') {
+      let errors = {};
+      Object.keys(error.errors).forEach((key) => {
+        errors[key] = error.errors[key].message;
+      });
+      return NextResponse.json({ success: false, errors: errors }, { status: 400 });
+    }
+    return NextResponse.json({ success: false, error: 'Server Error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params: { id } }) {
 
   if (!mongoose.isValidObjectId(id)) {
     return NextResponse.json({ success: false, error: 'Invalid event ID' }, { status: 400 });
@@ -47,8 +74,9 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
     }
 
-    // Return a 200 OK with an empty data object on successful deletion
-    return NextResponse.json({ success: true, data: {} }, { status: 200 });
+    // Return a 204 No Content response on successful deletion, which is a
+    // standard practice for successful DELETE requests.
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error(`Error deleting event ${id}:`, error);
     return NextResponse.json({ success: false, error: 'Server Error' }, { status: 500 });
