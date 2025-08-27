@@ -1,6 +1,7 @@
 import Link from "next/link";
 import EventCard from "@/components/EventCard";
 
+
 async function getEvents() {
   // When fetching on the server, we need to provide the full URL.
   // We'll use an environment variable for this.
